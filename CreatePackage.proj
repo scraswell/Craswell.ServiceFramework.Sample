@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+	
+	<PropertyGroup>
+	    <SolutionFile>Craswell.ServiceFramework.Sample.sln</SolutionFile>
+	    <Prefix>PREFIX</Prefix>
+	    <Configuration>Debug</Configuration>
+	    <BuildOutput>bin\$(Configuration)</BuildOutput>
+	    <DistFolder>$(BuildOutput)\_DIST</DistFolder>
+	    <DistPrefix>$(DistFolder)\$(Prefix)</DistPrefix>
+	    <BinFolder>$(DistPrefix)\bin</BinFolder>
+	    <ApplicationFolder>$(DistPrefix)\lib</ApplicationFolder>
+	</PropertyGroup>
+
+	<Target Name="CreateDistributionDirectories">
+		<ItemGroup>
+	        <DistributionDirectories Include="$(DistFolder);$(DistPrefix);$(BinFolder);$(ApplicationFolder)" />
+        </ItemGroup>
+	    <MakeDir Directories="@(DistributionDirectories)" />
+	</Target>
+
+    <Target Name="CopyApplicationFiles">
+        <ItemGroup>
+            <ApplicationFiles
+                Include="bin\$(Configuration)\*.config;bin\$(Configuration)\*.dll;bin\$(Configuration)\*.mdb;bin\$(Configuration)\*.exe;" />
+	    </ItemGroup>
+
+        <Copy
+            SourceFiles="@(ApplicationFiles)"
+            DestinationFolder="$(ApplicationFolder)" />
+    </Target>
+
+    <Target Name="CopyBinaries">
+		<ItemGroup>
+	        <BinFiles
+	            Include="Craswell.ServiceFramework.Sample;bin\$(Configuration)\logging.config" />
+	    </ItemGroup>
+        <Copy
+            SourceFiles="@(BinFiles)"
+            DestinationFolder="$(BinFolder)" />
+    </Target>
+
+    <Target Name="PackageApplication"
+        DependsOnTargets="CoreCompile;CreateDistributionDirectories;CopyApplicationFiles;CopyBinaries" >
+
+        <Exec Command="tar -cjvf &quot;bin/$(Configuration)/Craswell.ServiceFramework.Sample.tar.bz2&quot; -C &quot;$(DistFolder)&quot; &quot;$(Prefix)&quot;" />
+    </Target>
+</Project>
